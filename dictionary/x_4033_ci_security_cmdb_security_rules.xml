@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="CMDB Security Rules" max_length="40" name="x_4033_ci_security_cmdb_security_rules" type="collection">
+        <element attributes="base_table=cmdb_ci" label="CMDB Class" mandatory="true" max_length="40" name="cmdb_class" type="table_name"/>
+        <element label="Creation Groups" max_length="4000" name="creation_groups" reference="sys_user_group" type="glide_list"/>
+        <element label="Creation Roles" max_length="255" name="creation_roles" type="user_roles"/>
+        <element label="Write Groups" max_length="4000" name="write_groups" reference="sys_user_group" type="glide_list"/>
+        <element label="Write Roles" max_length="255" name="write_roles" type="user_roles"/>
+    </element>
+</database>

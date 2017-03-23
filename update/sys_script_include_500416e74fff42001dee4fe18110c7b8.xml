@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_4033_ci_security.CMDBSecurity</api_name>
+        <client_callable>false</client_callable>
+        <description>This class manages the CMDB Security Rules to grant or not create and write access to each CMDB Class</description>
+        <name>CMDBSecurity</name>
+        <script><![CDATA[var CMDBSecurity = Class.create();
+CMDBSecurity.prototype = {
+	initialize: function(ci) {
+		this.ci = ci;
+		this.table = this.ci.getTableName();
+		this.rule = null;
+	},
+	
+	canCreate: function() {
+		if(gs.hasRole('admin') || gs.hasRole('configuration_manager'))
+			return true;
+		
+		this._findSecurityRule();
+		if(this.rule == null)
+			return gs.hasRole('cmdb_create');
+		
+		return this._meetRoleCondition('create') || this._meetGroupCondition('create');
+	},
+	
+	canWrite: function() {
+		if(gs.hasRole('admin') || gs.hasRole('configuration_manager'))
+			return true;
+		
+		this._findSecurityRule();
+		if(this.rule == null)
+			return gs.hasRole('cmdb_write');
+		
+		return this._meetRoleCondition('write') || this._meetGroupCondition('write');
+	},
+	
+	
+	_findSecurityRule: function() {
+		var rule = new GlideRecord('u_cmdb_security_rules');
+		this.rule = (rule.get('u_cmdb_class', this.table)) ? rule : null;
+	},
+	
+	_meetRoleCondition: function(type) {
+		var roles;
+		if(type == 'create')
+			roles = this.rule.u_creation_roles;
+		else if(type == 'write')
+			roles = this.rule.u_write_roles;
+		else
+			return true;
+		
+		if(roles.nil())
+			return false;
+		
+		var rolesArray = roles.split(',');
+		
+		for(var i = 0; i < rolesArray.length; i++) {
+			if(gs.hasRole(rolesArray[i]))
+				return true;
+		}
+		
+		return false;
+	},
+	
+	_meetGroupCondition: function(type) {
+		var groups;
+		if(type == 'create')
+			groups = this.rule.u_creation_groups;
+		else if(type == 'write')
+			groups = this.rule.u_write_groups;
+		else
+			return true;
+		
+		if(groups.nil())
+			return false;
+		
+		var groupsArray = groups.split(',');
+		
+		for(var i = 0; i < groupsArray.length; i++) {
+			if(gs.getUser().isMemberOf(groupsArray[i]))
+				return true;
+		}
+		
+		return false;
+	},
+	
+	type: 'CMDBSecurity'
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2015-11-24 11:11:09</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>500416e74fff42001dee4fe18110c7b8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>CMDBSecurity</sys_name>
+        <sys_package display_value="CMDB Security Rules" source="x_4033_ci_security">6baf4a674fff42001dee4fe18110c740</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="CMDB Security Rules">6baf4a674fff42001dee4fe18110c740</sys_scope>
+        <sys_update_name>sys_script_include_500416e74fff42001dee4fe18110c7b8</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2015-11-24 11:11:09</sys_updated_on>
+    </sys_script_include>
+</record_update>
